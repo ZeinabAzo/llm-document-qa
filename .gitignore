@@ -221,3 +221,15 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Python
+__pycache__/
+*.pyc
+
+
+# Django
+db.sqlite3
+documents/
+
+# Security / API Keys
+.env
