@@ -226,6 +226,8 @@ __marimo__/
 __pycache__/
 *.pyc
 
+# Environments
+venv/
 
 # Django
 db.sqlite3
