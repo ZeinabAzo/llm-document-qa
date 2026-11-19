@@ -1,9 +1,11 @@
+import io
 import shutil
 import tempfile
 from pathlib import Path
+from unittest import mock
 
 from django.contrib.auth import get_user_model
-from django.core.management import call_command
+from django.core.management import CommandError, call_command
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework.test import APITestCase
@@ -184,6 +186,31 @@ class AskAPITests(APITestBase):
         self.assertEqual(listing["results"][0]["question"], "Q1")
         detail = self.client.get(reverse("history-detail", args=[entry_id]))
         self.assertEqual(detail.status_code, 200)
+
+
+@override_settings(MEDIA_ROOT=MEDIA_ROOT)
+class AskCommandTests(TestCase):
+    def test_ask_command_prints_answer_and_sources_and_saves_history(self):
+        call_command("load_sample_data", stdout=io.StringIO())
+        out = io.StringIO()
+        with fake_rag(answers=["22 days [1]."]):
+            call_command("ask", "How", "many", "PTO", "days?", "--top-k", "2", stdout=out)
+        text = out.getvalue()
+        self.assertIn("22 days [1].", text)
+        self.assertIn("[1] NovaTech_Solutions_Employee_IT_Handbook_2026.docx", text)
+        self.assertEqual(QAHistory.objects.get().question, "How many PTO days?")
+
+    def test_ask_command_without_documents_fails_cleanly(self):
+        with fake_rag(), self.assertRaisesMessage(CommandError, "No documents"):
+            call_command("ask", "Anything?", stdout=io.StringIO())
+
+    def test_interactive_mode_answers_until_empty_line(self):
+        call_command("load_sample_data", stdout=io.StringIO())
+        out = io.StringIO()
+        with fake_rag(answers=["A1", "A2"]), mock.patch("builtins.input", side_effect=["q1", "q2", ""]):
+            call_command("ask", stdout=out)
+        self.assertEqual(QAHistory.objects.count(), 2)
+        self.assertIn("A2", out.getvalue())
 
 
 @override_settings(MEDIA_ROOT=MEDIA_ROOT)

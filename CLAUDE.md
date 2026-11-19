@@ -10,6 +10,8 @@ A Django project that lets users upload `.docx` documents and ask questions answ
 | `workflow.md` | Decision log: what was done, in which order, why, alternatives rejected | **Every work session**, with a new dated section at the bottom |
 | `document.md` | Learning notes: concepts behind the code, likely interview questions | A new concept/technique is introduced |
 | `README.md` | Reviewer-facing: setup, usage, architecture summary | Setup or features change |
+| `HOW_TO_USE.md` | Copy-paste daily usage guide (PowerShell), troubleshooting table | Commands or UI flows change |
+| `test_documents/QUESTIONS.md` | Test documents + 28 verified questions with expected answers | Test documents change |
 | `docs/API.md` | API reference | Endpoints change |
 
 Working rules from the project owner:
@@ -43,7 +45,7 @@ Deliverables (a single zip):
 - [x] Source code
 - [x] `Dockerfile` and `docker-compose.yml` (written; **not yet built**, since Docker isn't installed on the dev machine)
 - [x] `README.md` with setup steps
-- [ ] Screenshots of the admin panel (list in `docs/screenshots/README.md`)
+- [ ] Screenshots of the admin panel (save them in `docs/screenshots/`)
 - [x] API documentation (`docs/API.md` + Swagger at `/api/docs/`)
 - [x] Sample data (`sample_data/NovaTech_Solutions_Employee_IT_Handbook_2026.docx`)
 
@@ -77,8 +79,9 @@ management/commands/      ─┘        │
 
 ```bash
 venv/Scripts/python.exe manage.py runserver            # needs DJANGO_DEBUG=1 or DJANGO_SECRET_KEY in .env
-venv/Scripts/python.exe manage.py test rag_app         # 54 tests, offline (fake LLM + fake embeddings)
+venv/Scripts/python.exe manage.py test rag_app         # 57 tests, offline (fake LLM + fake embeddings)
 venv/Scripts/python.exe manage.py load_sample_data
+venv/Scripts/python.exe manage.py ask "question"       # ask from the terminal (no args = interactive)
 venv/Scripts/python.exe manage.py spectacular --validate --fail-on-warn > /dev/null   # check OpenAPI schema
 docker compose up --build
 ```
@@ -96,7 +99,6 @@ docker compose up --build
 ## Open items
 
 1. Build and run the Docker image once on a machine with Docker.
-2. Take admin screenshots (`docs/screenshots/README.md`).
-3. Delete the legacy `db.sqlite3` and `documents/` in the project root (unused, git-ignored).
-4. Optionally compare a few free OpenRouter models for answer quality and citation reliability.
-5. Possible improvements (talk about these rather than build them): cross-encoder reranking, persisted/incremental embeddings (pgvector), PDF support, an evaluation question set.
+2. Take admin screenshots into `docs/screenshots/`: documents list, a document's extracted text, the ask form, an answer with sources, the history list, Swagger (`/api/docs/`).
+3. Optionally compare a few free OpenRouter models for answer quality and citation reliability.
+4. Possible improvements (talk about these rather than build them): cross-encoder reranking, persisted/incremental embeddings (pgvector), PDF support, an evaluation question set.

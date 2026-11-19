@@ -9,7 +9,7 @@ Upload these four files (in the admin or with `POST /api/documents/`), then ask 
 | `Lindqvist_Foundation_Board_Minutes.docx` | Meeting minutes | No headings at all, plain paragraphs and bullets |
 | `../sample_data/NovaTech_..._Handbook_2026.docx` | IT handbook | The original sample (fake headings, tables, callout) |
 
-To regenerate the three test files: `python test_documents/build_test_documents.py`. They are fictional.
+All names, numbers and contact details in these files are fictional.
 
 ## Questions and expected answers
 

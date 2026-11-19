@@ -19,7 +19,9 @@ Built with **Django**, **Django REST Framework**, **LangChain**, local **sentenc
 | Grounded answer | Strict prompt: answer only from the numbered passages, cite them as `[1]`, otherwise return a fixed fallback sentence. |
 | Q&A history | `QAHistory` stores question, answer, the source passages, model name and latency. Admin + `GET /api/history/`. |
 
-Also included: duplicate-upload detection, input validation with clear errors, authentication, rate limiting on the LLM endpoint, OpenAPI/Swagger docs, a health check, 54 automated tests, and a Docker setup that works offline after build.
+Also included: duplicate-upload detection, input validation with clear errors, authentication, rate limiting on the LLM endpoint, OpenAPI/Swagger docs, a health check, a terminal `ask` command, 57 automated tests, and a Docker setup that works offline after build.
+
+> **Just want to use it?** Copy-paste steps are in **[HOW_TO_USE.md](HOW_TO_USE.md)**.
 
 ---
 
@@ -76,6 +78,15 @@ python manage.py test rag_app
 
 1. **Documents → Add**: choose a `.docx` file (title is optional). The text is extracted immediately; open the document to see the extracted Markdown.
 2. **Q&A history → Add**: type a question and save. The answer, its cited sources and the response time are stored and shown.
+
+### From the terminal
+
+```bash
+python manage.py ask "How many PTO days do employees get?"   # one question
+python manage.py ask                                         # interactive: keep asking
+```
+
+Answers are printed with their numbered sources and saved to the Q&A history. No server or login needed.
 
 ### Through the API
 
@@ -204,8 +215,8 @@ rag_app/
   admin.py, forms.py    Admin UI (incl. "ask a question" form)
   signals.py            delete files from disk with their documents
   rag/                  extraction, chunking, hybrid index, prompt/LLM chain
-  management/commands/  load_sample_data
-  tests/                54 tests (offline)
+  management/commands/  load_sample_data, ask (ask questions from the terminal)
+  tests/                57 tests (offline)
 docker/entrypoint.sh    migrate, create admin, load sample data, start server
 sample_data/            sample .docx for testing
 docs/                   API reference, screenshots

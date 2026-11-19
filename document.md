@@ -242,3 +242,15 @@ The `vector_rank` and `keyword_rank` fields in the API's `sources` show exactly 
 - **`ALLOWED_HOSTS`** protects against Host-header attacks.
 - **Uploaded files are private:** served only to logged-in staff.
 - **Validate uploads:** extension, size, parseability, duplicates. Never trust the client.
+
+---
+
+## 14. Custom management commands (`management/commands/ask.py`)
+
+Any file in `<app>/management/commands/<name>.py` defining a `Command(BaseCommand)` class becomes `python manage.py <name>`.
+
+- `add_arguments(parser)` uses Python's standard `argparse`. `nargs="*"` accepts zero or more words, so `ask How many days?` works without quotes (quotes are still safer for `'` and `?` in some shells). Zero words means interactive mode.
+- `handle()` does the work. Use `self.stdout.write` (not `print`) so tests can capture the output with `call_command(..., stdout=io.StringIO())`.
+- `CommandError` prints a clean message and exits with a non-zero status code. Scripts and CI can detect failure that way.
+- **Why it's fast after the first question:** a long-running process keeps the embedding model and index in memory. Each new `manage.py` process starts from zero. That's the same reason the web server uses one long-lived worker.
+- Testing interactive input: `mock.patch("builtins.input", side_effect=["q1", "q2", ""])` feeds typed lines to `input()`.

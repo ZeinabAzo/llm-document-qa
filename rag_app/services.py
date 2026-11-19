@@ -16,7 +16,6 @@ from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
 from django.db.models import Count, Max
 from langchain_core.embeddings import Embeddings
-from langchain_core.language_models import BaseChatModel
 from langchain_core.runnables import Runnable
 
 from .models import Document, QAHistory
@@ -159,14 +158,14 @@ document_index = DocumentIndex()
 
 
 @lru_cache(maxsize=1)
-def get_llm() -> BaseChatModel:
-    """Create the chat model once and reuse its HTTP connection pool."""
+def get_answer_chain() -> Runnable:
+    """Build the prompt -> LLM -> text chain once and reuse its HTTP connection pool."""
     if not settings.OPENROUTER_API_KEY:
         raise LLMError("The LLM is not configured: set OPENROUTER_API_KEY.")
     from langchain_openai import ChatOpenAI
 
     # OpenRouter exposes an OpenAI-compatible API, so the OpenAI client works as-is.
-    return ChatOpenAI(
+    llm = ChatOpenAI(
         model=settings.OPENROUTER_MODEL,
         api_key=settings.OPENROUTER_API_KEY,
         base_url=settings.OPENROUTER_BASE_URL,
@@ -174,11 +173,7 @@ def get_llm() -> BaseChatModel:
         timeout=settings.LLM_TIMEOUT_SECONDS,
         max_retries=2,
     )
-
-
-@lru_cache(maxsize=1)
-def get_answer_chain() -> Runnable:
-    return build_answer_chain(get_llm())
+    return build_answer_chain(llm)
 
 
 @dataclass(frozen=True)
