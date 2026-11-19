@@ -21,7 +21,12 @@ Built with **Django**, **Django REST Framework**, **LangChain**, local **sentenc
 
 Also included: duplicate-upload detection, input validation with clear errors, authentication, rate limiting on the LLM endpoint, OpenAPI/Swagger docs, a health check, a terminal `ask` command, 57 automated tests, and a Docker setup that works offline after build.
 
-> **Just want to use it?** Copy-paste steps are in **[HOW_TO_USE.md](HOW_TO_USE.md)**.
+> **Reviewer quick path**
+> 1. **Run it:** [Quick start (Docker)](#quick-start-docker), about 3 commands.
+> 2. **See it:** [Screenshots](#screenshots) of the admin and the API, no setup needed.
+> 3. **Understand it:** [Architecture](#architecture) and [Key technical decisions](#key-technical-decisions) below; deeper reasoning in [workflow.md](workflow.md).
+> 4. **Use the API:** Swagger at `/api/docs/`, reference in [docs/API.md](docs/API.md).
+> 5. **Try sample questions:** [test_documents/QUESTIONS.md](test_documents/QUESTIONS.md). Day-to-day commands: [HOW_TO_USE.md](HOW_TO_USE.md).
 
 ---
 
@@ -46,7 +51,11 @@ The first build takes a few minutes (it downloads PyTorch CPU and the embedding 
 
 With `LOAD_SAMPLE_DATA=1` (the default in `.env.example`) the sample handbook from `sample_data/` is uploaded on startup, so you can ask questions immediately.
 
-> The first question after startup takes a few seconds longer: the embedding model is loaded and the search index is built once, then reused.
+> The first question after startup is slow (about 45 s in Docker on a laptop): the embedding model is loaded and the search index is built once, then reused. Later questions take about 5 s.
+
+> **Docker Hub blocked on your network** (`403 Forbidden` while pulling `python`)? Add `PYTHON_IMAGE=public.ecr.aws/docker/library/python:3.11-slim` to `.env`. It is the same official image, served from Amazon's registry.
+
+Useful commands: `docker compose up -d` (run in background), `docker compose logs -f`, `docker compose exec web python manage.py ask` (ask from the terminal), `docker compose down` (stop; data is kept in a volume; add `-v` to wipe it).
 
 ## Local development (without Docker)
 
@@ -224,7 +233,29 @@ docs/                   API reference, screenshots
 
 ## Screenshots
 
-See [docs/screenshots/](docs/screenshots/).
+**Documents**: upload, list and character counts.
+
+![Documents list](docs/screenshots/01-documents-list.png)
+
+**Extracted text**: each document is converted to Markdown (headings, lists, tables).
+
+![Document detail with extracted text](docs/screenshots/02-document-detail.png)
+
+**Ask a question** from the admin.
+
+![Ask a question](docs/screenshots/03-ask-question.png)
+
+**The answer** with numbered sources, so every claim can be checked.
+
+![Answer with sources](docs/screenshots/04-answer-with-sources.png)
+
+**History**: every question, answer, model and response time.
+
+![Q&A history](docs/screenshots/05-history-list.png)
+
+**REST API** documentation (Swagger UI at `/api/docs/`).
+
+![Swagger UI](docs/screenshots/06-swagger.png)
 
 ## Limitations and next steps
 

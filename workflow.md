@@ -316,3 +316,29 @@ rag/          pure pipeline: extract, chunk, index, prompt/LLM; no Django import
 - Index rank fields (`vector_rank`, `keyword_rank`): small, and valuable in the demo to show how hybrid search found each passage.
 
 **Verified:** 57 tests pass, and a real question through the merged function returned a correct answer.
+
+---
+
+## Session 5: first real Docker build and test (2026-11-19)
+
+**Context:** Docker Desktop was installed on the dev machine, so the Docker setup could finally be tested instead of assumed.
+
+**Problems found and how they were solved**
+
+| Problem | Cause | Fix |
+|---|---|---|
+| Build failed immediately: `403 Forbidden` from `auth.docker.io` | The user's network blocks Docker Hub. Plain `curl` to it also got 403, while PyPI, Hugging Face and download.pytorch.org worked. This was diagnosed with `curl` before changing anything | Made the base image a build argument: `ARG PYTHON_IMAGE=python:3.11-slim` in the `Dockerfile`, passed from `docker-compose.yml` as `${PYTHON_IMAGE:-python:3.11-slim}`. The user's local `.env` sets `PYTHON_IMAGE=public.ecr.aws/docker/library/python:3.11-slim`, the same official image on Amazon's registry (reachable: 401 means "login required", not blocked) |
+| A second build failed at `pip install` | Flaky network: the log showed `SSLEOFError` and connection-reset retries on PyPI | Re-ran the build with `--progress=plain` to see the real error. It passed on retry. No code change |
+
+- *Why a build argument, not a hard-coded mirror:* the repository stays standard (`python:3.11-slim`), so reviewers on normal networks build with no extra steps. Only this machine's git-ignored `.env` differs. Documented in the README and `.env.example`.
+- *Why diagnose before changing:* a 403 can mean many things (credentials, rate limit, region block). Testing the same URL outside Docker and comparing with other registries showed it was the network and not the project.
+
+**Verified in the running container** (image 1.73 GB, health check `healthy` after ~20 s)
+
+- Entrypoint ran correctly: migrations, admin user created from `.env`, sample handbook loaded, gunicorn started.
+- Admin login page, admin CSS (WhiteNoise with `DEBUG=0`), and Swagger page: HTTP 200.
+- API without login: 403. With login: lists the handbook.
+- A real question through OpenRouter: correct, cited answer. First question 45 s (loads the embedding model and builds the index once); a later one 5 s.
+- `docker compose restart`: documents and history survived (volume works) and the sample loader did not add a duplicate.
+
+**Open:** admin screenshots (user).

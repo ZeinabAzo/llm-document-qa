@@ -1,4 +1,6 @@
-FROM python:3.11-slim
+# Overridable because Docker Hub is blocked on some networks (see PYTHON_IMAGE in .env.example).
+ARG PYTHON_IMAGE=python:3.11-slim
+FROM ${PYTHON_IMAGE}
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \

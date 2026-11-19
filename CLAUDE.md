@@ -43,7 +43,7 @@ Free LLM: OpenRouter, a model from https://openrouter.ai/collections/free-models
 
 Deliverables (a single zip):
 - [x] Source code
-- [x] `Dockerfile` and `docker-compose.yml` (written; **not yet built**, since Docker isn't installed on the dev machine)
+- [x] `Dockerfile` and `docker-compose.yml` (**built and tested** on the dev machine on 2026-11-19: admin, static files, API auth, a real question, data survives restart)
 - [x] `README.md` with setup steps
 - [ ] Screenshots of the admin panel (save them in `docs/screenshots/`)
 - [x] API documentation (`docs/API.md` + Swagger at `/api/docs/`)
@@ -98,7 +98,6 @@ docker compose up --build
 
 ## Open items
 
-1. Build and run the Docker image once on a machine with Docker.
-2. Take admin screenshots into `docs/screenshots/`: documents list, a document's extracted text, the ask form, an answer with sources, the history list, Swagger (`/api/docs/`).
-3. Optionally compare a few free OpenRouter models for answer quality and citation reliability.
-4. Possible improvements (talk about these rather than build them): cross-encoder reranking, persisted/incremental embeddings (pgvector), PDF support, an evaluation question set.
+1. Take admin screenshots into `docs/screenshots/`: documents list, a document's extracted text, the ask form, an answer with sources, the history list, Swagger (`/api/docs/`).
+2. Optionally compare a few free OpenRouter models for answer quality and citation reliability.
+3. Possible improvements (talk about these rather than build them): cross-encoder reranking, persisted/incremental embeddings (pgvector), PDF support, an evaluation question set.
