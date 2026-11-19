@@ -14,7 +14,7 @@ Type a question and press Enter. Press Enter on an empty line to quit.
 - You don't say which document: all uploaded documents are searched.
 - The first answer takes about 15 seconds, then about 3.
 - No documents yet? Run `python manage.py load_sample_data`.
-- Try the questions in [test_documents/QUESTIONS.md](test_documents/QUESTIONS.md).
+- Try the questions in [test_documents/QUESTIONS.md](../test_documents/QUESTIONS.md).
 
 ## 2. Upload and manage documents
 
@@ -40,4 +40,4 @@ No admin account yet? Run `python manage.py createsuperuser`.
 
 ---
 
-The REST API, Docker and the other commands are in [README.md](README.md) and [docs/API.md](docs/API.md).
+The REST API, Docker and the other commands are in [README.md](../README.md) and [API.md](API.md).
