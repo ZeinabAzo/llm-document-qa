@@ -1,31 +1,87 @@
-from django.shortcuts import render
+from django.db.models.functions import Length
+from drf_spectacular.utils import OpenApiResponse, extend_schema, extend_schema_view
+from rest_framework import status, viewsets
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
+from rest_framework.views import APIView
 
-import json
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from .ai_engine import ask_question
-from .models import QAHistory
+from . import services
+from .models import Document, QAHistory
+from .serializers import (
+    AskSerializer,
+    DocumentDetailSerializer,
+    DocumentSerializer,
+    QAHistorySerializer,
+)
 
 
-@csrf_exempt
-def ask_api(request):
-    """Handle POST requests with a JSON question, return the RAG answer, and log it."""
-    if request.method != "POST":
-        return JsonResponse({"error": "Only POST requests are allowed."}, status=405)
+@extend_schema_view(
+    list=extend_schema(summary="List documents"),
+    create=extend_schema(summary="Upload a .docx document"),
+    retrieve=extend_schema(summary="Get a document, including its extracted text"),
+    update=extend_schema(summary="Replace a document (title and file)"),
+    partial_update=extend_schema(summary="Rename a document or replace its file"),
+    destroy=extend_schema(summary="Delete a document and its file"),
+)
+class DocumentViewSet(viewsets.ModelViewSet):
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
-    try:
-        body = json.loads(request.body)
-        question = body.get("question", "").strip()
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "Invalid JSON body."}, status=400)
+    def get_queryset(self):
+        queryset = Document.objects.all()
+        if self.action == "list":
+            # Count characters in SQL instead of loading every full text.
+            queryset = queryset.defer("extracted_text").annotate(
+                text_length=Length("extracted_text")
+            )
+        return queryset
 
-    if not question:
-        return JsonResponse({"error": "The 'question' field is required."}, status=400)
+    def get_serializer_class(self):
+        return DocumentDetailSerializer if self.action == "retrieve" else DocumentSerializer
 
-    # Generate answer using the RAG pipeline
-    answer = ask_question(question)
 
-    # Save the interaction to QAHistory
-    QAHistory.objects.create(question=question, answer=answer)
+@extend_schema_view(
+    list=extend_schema(summary="List previous questions and answers"),
+    retrieve=extend_schema(summary="Get one question and answer"),
+)
+class QAHistoryViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = QAHistory.objects.all()
+    serializer_class = QAHistorySerializer
 
-    return JsonResponse({"question": question, "answer": answer}, status=200)
+
+class AskView(APIView):
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "ask"
+
+    @extend_schema(
+        summary="Ask a question about the uploaded documents",
+        request=AskSerializer,
+        responses={
+            201: QAHistorySerializer,
+            400: OpenApiResponse(description="Invalid input."),
+            409: OpenApiResponse(description="No documents have been uploaded yet."),
+            502: OpenApiResponse(description="The LLM provider failed or timed out."),
+        },
+    )
+    def post(self, request):
+        serializer = AskSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            entry = services.ask(**serializer.validated_data)
+        except services.NoDocumentsError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_409_CONFLICT)
+        except services.LLMError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_502_BAD_GATEWAY)
+        return Response(QAHistorySerializer(entry).data, status=status.HTTP_201_CREATED)
+
+
+class HealthView(APIView):
+    """Liveness check for Docker / load balancers. Does not touch the LLM."""
+
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    @extend_schema(summary="Health check", responses={200: OpenApiResponse(description="OK")})
+    def get(self, request):
+        return Response({"status": "ok"})
