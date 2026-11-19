@@ -24,7 +24,7 @@ Also included: duplicate-upload detection, input validation with clear errors, a
 > **Reviewer quick path**
 > 1. **Run it:** [Quick start (Docker)](#quick-start-docker), about 3 commands.
 > 2. **See it:** [Screenshots](#screenshots) of the admin and the API, no setup needed.
-> 3. **Understand it:** [Architecture](#architecture) and [Key technical decisions](#key-technical-decisions) below; deeper reasoning in [workflow.md](workflow.md).
+> 3. **Understand it:** [Architecture](#architecture) and [Key technical decisions](#key-technical-decisions) below.
 > 4. **Use the API:** Swagger at `/api/docs/`, reference in [docs/API.md](docs/API.md).
 > 5. **Try sample questions:** [test_documents/QUESTIONS.md](test_documents/QUESTIONS.md). Day-to-day commands: [HOW_TO_USE.md](HOW_TO_USE.md).
 
@@ -190,7 +190,6 @@ Full endpoint reference with all request/response formats and error codes: **[do
 | SQLite in a Docker volume | Zero setup, enough for a single-instance app. | Swap for PostgreSQL for multi-instance deployments (one setting). |
 | One gunicorn worker, 4 threads | One copy of the model + index in memory; threads cover concurrent LLM waits. | Horizontal scaling would need a shared vector store. |
 
-More detailed reasoning for every decision is in [workflow.md](workflow.md).
 
 ---
 

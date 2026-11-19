@@ -2,3 +2,10 @@
 *.sh text eol=lf
 *.docx binary
 *.png binary
+
+# Left out of the submission zip (`git archive`), still kept in the repository:
+# personal working notes and AI-assistant files, not part of the deliverable.
+CLAUDE.md export-ignore
+workflow.md export-ignore
+document.md export-ignore
+.gitattributes export-ignore
