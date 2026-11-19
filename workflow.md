@@ -237,3 +237,31 @@ rag/          pure pipeline: extract, chunk, index, prompt/LLM; no Django import
    - Swagger.
 2. Architecture (3 min): the three-layer diagram in the README, and the upload and question flows.
 3. Decisions (3 min): hybrid + RRF, heading detection discovered from the real file, text hash for duplicates, in-memory index with a cheap staleness check, strict prompt with numbered citations, 1 worker + threads. For each, the trade-off and what you'd do at scale.
+
+---
+
+## Session 2: test documents and question set (2026-11-19)
+
+**Goal:** give you realistic material to test and demo with, beyond the single sample handbook.
+
+**What was added** (`test_documents/`):
+
+| File | Deliberately tests |
+|---|---|
+| `Aurora_Cloud_Hosting_Service_Guide.docx` | Real Word heading styles (the other documents use fake bold headings, so both code paths of heading detection run), a table with repeated `Yes \| Yes` values (bug B4), a horizontally merged table row |
+| `Meridian_Clinic_Patient_Policy.docx` | Bold numbered fake headings, a 1x1 callout box (bug B9), exact identifiers (form code, email, phone numbers: the case where BM25 matters), a directory table |
+| `Lindqvist_Foundation_Board_Minutes.docx` | **No headings at all.** Every chunk gets an empty section; checks that nothing relies on headings existing |
+| `QUESTIONS.md` | 28 questions with expected answers, grouped by what each tests |
+| `build_test_documents.py` | Regenerates the three files, so the content is reviewable as code |
+
+**Decisions**
+
+- **Separate folder, not `sample_data/`.** `load_sample_data` (and the Docker entrypoint with `LOAD_SAMPLE_DATA=1`) uploads everything in `sample_data/`. Reviewers should start with one clean document, so test material lives apart and is uploaded by hand.
+- **Fictional content with unambiguous facts.** Each question has exactly one correct answer, so a pass/fail is objective. Some are deliberately tricky rather than easy:
+  - *Name collision:* "Project Meridian" (NovaTech) vs "Meridian Clinic". Retrieval must pick the right document.
+  - *Needs inference or arithmetic:* "14-year-old alone?" and the 0.3% uptime credit.
+  - *Looks like a gap but is not:* "price of Enterprise" is answered ("custom quote"). A good system must not fall back here.
+  - *Looks answerable but is not:* "Who voted against Hamburg?" (only the count is given), and "Clara Dubois's job title" (only named in the apologies). These check that the model does not guess.
+- **Verified for real, not assumed.** I loaded all four documents into a throwaway database (so your data was not touched) and ran all 28 questions through the real embeddings and the real OpenRouter model: **28/28 behaved as expected** (24 correct answers, 4 correct fallbacks). The expected answers in `QUESTIONS.md` are therefore observed behaviour, not guesses.
+
+**Caveat to remember:** answers come from a free LLM, so wording varies between runs and a different model may fail a tricky question (the arithmetic one is the most likely). Treat the facts as the pass criterion, not the exact sentence.
