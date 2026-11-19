@@ -26,7 +26,7 @@ Also included: duplicate-upload detection, input validation with clear errors, a
 > 2. **See it:** [Screenshots](#screenshots) of the admin and the API, no setup needed.
 > 3. **Understand it:** [Architecture](#architecture) and [Key technical decisions](#key-technical-decisions) below.
 > 4. **Use the API:** Swagger at `/api/docs/`, reference in [docs/API.md](docs/API.md).
-> 5. **Try sample questions:** [test_documents/QUESTIONS.md](test_documents/QUESTIONS.md). Day-to-day commands: [HOW_TO_USE.md](HOW_TO_USE.md).
+> 5. **Try sample questions:** [test_documents/QUESTIONS.md](test_documents/QUESTIONS.md). Day-to-day commands: [docs/HOW_TO_USE.md](docs/HOW_TO_USE.md).
 
 ---
 

@@ -7,5 +7,5 @@
 # personal working notes and AI-assistant files, not part of the deliverable.
 CLAUDE.md export-ignore
 workflow.md export-ignore
-document.md export-ignore
+docs/document.md export-ignore
 .gitattributes export-ignore

@@ -8,16 +8,16 @@ A Django project that lets users upload `.docx` documents and ask questions answ
 |---|---|---|
 | `CLAUDE.md` (this file) | What the project is: requirements, architecture, conventions, current status | The structure or status changes |
 | `workflow.md` | Decision log: what was done, in which order, why, alternatives rejected | **Every work session**, with a new dated section at the bottom |
-| `document.md` | Learning notes: concepts behind the code, likely interview questions | A new concept/technique is introduced |
+| `docs/document.md` | Learning notes: concepts behind the code, likely interview questions | A new concept/technique is introduced |
 | `README.md` | Reviewer-facing: setup, usage, architecture summary | Setup or features change |
-| `HOW_TO_USE.md` | Copy-paste daily usage guide (PowerShell), troubleshooting table | Commands or UI flows change |
+| `docs/HOW_TO_USE.md` | Copy-paste daily usage guide (PowerShell), troubleshooting table | Commands or UI flows change |
 | `test_documents/QUESTIONS.md` | Test documents + 28 verified questions with expected answers | Test documents change |
 | `docs/API.md` | API reference | Endpoints change |
 
 Working rules from the project owner:
 1. Always explain deeply what is done and log it in `workflow.md`.
 2. This is a hiring challenge: production-quality, but no unnecessary complexity.
-3. Keep `document.md` growing as a learning resource.
+3. Keep `docs/document.md` growing as a learning resource.
 
 ## Assignment requirements (source of truth)
 
